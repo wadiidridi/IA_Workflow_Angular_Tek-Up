@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal, OnDestroy } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, OnDestroy, ViewChild, ElementRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -430,34 +430,47 @@ interface NodeStatusMap {
       width: 100%;
     }
 
-    .steps-section, .logs-section {
-      flex-shrink: 0;
-    }
-
     .logs-section {
       flex: 1;
       display: flex;
       flex-direction: column;
+      min-height: 0;
       overflow: hidden;
     }
 
-    .steps-list, .logs-output {
+    .steps-list {
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
-      max-height: 250px;
+      max-height: 200px;
       overflow-y: auto;
     }
 
-    .logs-section .logs-output {
+    .logs-output {
       flex: 1;
-      max-height: none;
-      background: rgba(15, 23, 42, 0.6);
-      border-radius: 0.5rem;
-      padding: 0.6rem;
-      border: 1px solid rgba(186, 230, 253, 0.12);
-      font-family: 'Monaco', monospace;
+      min-height: 180px;
+      max-height: 380px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      background: rgba(2, 6, 23, 0.75);
+      border-radius: 0.6rem;
+      padding: 0.75rem;
+      border: 1px solid rgba(186, 230, 253, 0.14);
+      font-family: 'Monaco', 'Consolas', monospace;
       font-size: 0.75rem;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(186, 230, 253, 0.2) transparent;
+    }
+
+    .logs-output::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .logs-output::-webkit-scrollbar-thumb {
+      background: rgba(186, 230, 253, 0.2);
+      border-radius: 3px;
     }
 
     .step {
@@ -494,9 +507,18 @@ interface NodeStatusMap {
     }
 
     .log-line {
-      color: #cbd5e1;
-      font-size: 0.7rem;
+      color: #93c5fd;
+      font-size: 0.73rem;
+      line-height: 1.6;
       word-break: break-word;
+      padding: 0.1rem 0;
+    }
+
+    .log-line:first-child { padding-top: 0; }
+
+    .log-line:not(:last-child) {
+      border-bottom: 1px solid rgba(186, 230, 253, 0.06);
+      padding-bottom: 0.15rem;
     }
 
     .control-section {
@@ -580,6 +602,18 @@ export class WorkflowPlaygroundComponent implements OnInit, OnDestroy {
   logs = signal<string[]>([]);
   nodeStatusMap = signal<NodeStatusMap>({});
   eventSource: EventSource | null = null;
+
+  @ViewChild('logsEnd') logsEnd?: ElementRef<HTMLDivElement>;
+
+  constructor() {
+    effect(() => {
+      // auto-scroll to bottom whenever logs update
+      this.logs();
+      setTimeout(() => {
+        this.logsEnd?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 50);
+    });
+  }
 
   nodeStatus = computed(() => {
     const map: NodeStatusMap = {};

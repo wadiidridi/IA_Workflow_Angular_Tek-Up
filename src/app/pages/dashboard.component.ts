@@ -80,13 +80,14 @@ import { KpiData } from '../models';
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 1rem;
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
       }
 
       .board-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1rem;
+        gap: 1.25rem;
       }
 
       .card-panel {

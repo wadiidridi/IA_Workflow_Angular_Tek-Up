@@ -1,6 +1,13 @@
 ﻿<div class="app-shell" [class.sidebar-collapsed]="sidebarCollapsed()">
   <aside class="sidebar" [class.open]="sidebarOpen()" aria-label="Navigation principale">
     <button type="button" class="sidebar-close" (click)="closeMobileSidebar()" aria-label="Fermer le menu">✕</button>
+
+    <div class="sidebar-top-actions" *ngIf="auth.isAuthenticated">
+      <button type="button" class="collapse-button" (click)="toggleCollapse()" [title]="sidebarCollapsed() ? 'Etendre' : 'Reduire'">
+        {{ sidebarCollapsed() ? '⇥' : '⇤' }}
+      </button>
+    </div>
+
     <div class="brand">
       <div class="brand-mark">T</div>
       <div class="brand-copy">
@@ -42,9 +49,6 @@
         </div>
       </div>
       <div class="sidebar-actions">
-        <button type="button" class="collapse-button" (click)="toggleCollapse()" title="{{ sidebarCollapsed() ? 'Etendre' : 'Reduire' }}">
-          {{ sidebarCollapsed() ? '⇥' : '⇤' }}
-        </button>
         <button type="button" class="logout-button" (click)="logout()">Deconnexion</button>
       </div>
     </div>

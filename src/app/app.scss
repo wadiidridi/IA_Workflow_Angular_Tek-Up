@@ -201,6 +201,22 @@
   gap: 0.75rem;
 }
 
+.sidebar-top-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: -0.4rem;
+}
+
+.sidebar-top-actions .collapse-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
 .sidebar-actions {
   display: flex;
   gap: 0.5rem;

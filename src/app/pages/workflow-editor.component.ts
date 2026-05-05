@@ -82,6 +82,14 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
         <div class="canvas" (click)="cancelConnection()">
           <div class="canvas-inner">
           <svg class="edge-layer">
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"></path>
+              </marker>
+              <marker id="arrow-selected" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#0ea5e9"></path>
+              </marker>
+            </defs>
             <ng-container *ngFor="let edge of edgePaths(); trackBy: trackEdge">
               <path
                 [attr.d]="edge.path"
@@ -93,12 +101,17 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
                 [attr.d]="edge.path"
                 class="edge-path"
                 [class.selected]="selectedEdgeId() === edge.id"
+                [attr.stroke-dasharray]="'8 5'"
+                [attr.stroke]="selectedEdgeId() === edge.id ? '#0ea5e9' : '#3b82f6'"
+                [attr.stroke-width]="selectedEdgeId() === edge.id ? '2.5' : '2'"
+                fill="none"
+                [attr.marker-end]="selectedEdgeId() === edge.id ? 'url(#arrow-selected)' : 'url(#arrow)'"
               ></path>
             </ng-container>
           </svg>
 
           <svg class="temp-edge-layer" *ngIf="tempEdgePath()">
-            <path [attr.d]="tempEdgePath()" class="temp-edge-path"></path>
+            <path [attr.d]="tempEdgePath()" class="temp-edge-path" [attr.stroke-dasharray]="'6 5'" marker-end="url(#arrow)"></path>
           </svg>
 
           <div
@@ -200,6 +213,7 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
     `
       :host {
         display: block;
+        position: relative;
       }
 
       .editor-toolbar {
@@ -369,16 +383,16 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
 
       .edge-path {
         fill: none;
-        stroke: #4f46e5;
-        stroke-width: 2.5;
+        stroke: #3b82f6;
+        stroke-width: 2;
         pointer-events: none;
         transition: stroke 0.15s ease, stroke-width 0.15s ease;
       }
 
       .edge-path.selected {
         stroke: #0ea5e9;
-        stroke-width: 3.5;
-        filter: drop-shadow(0 0 4px rgba(14, 165, 233, 0.6));
+        stroke-width: 2.5;
+        filter: drop-shadow(0 0 4px rgba(14, 165, 233, 0.55));
       }
 
       .temp-edge-layer {
@@ -574,27 +588,71 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
       .modal-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(15, 23, 42, 0.42);
+        z-index: 9999;
+        background: rgba(7, 17, 31, 0.72);
+        backdrop-filter: blur(6px);
         display: grid;
-        place-items: center;
+        align-items: start;
+        justify-items: center;
+        padding-top: 12vh;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        padding-bottom: 1rem;
       }
 
       .modal {
-        width: min(460px, 90vw);
-        border-radius: 0.8rem;
+        width: min(480px, 90vw);
+        border-radius: 1.1rem;
         background: #ffffff;
         border: 1px solid #e2e8f0;
-        padding: 1rem;
+        padding: 1.75rem;
+        box-shadow: 0 32px 80px rgba(7, 17, 31, 0.45);
+        animation: modal-in 0.22s ease both;
+      }
+
+      @keyframes modal-in {
+        from { opacity: 0; transform: scale(0.94) translateY(-12px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+      }
+
+      .modal h3 {
+        margin: 0 0 1rem;
+        font-size: 1.1rem;
+        color: #0f172a;
       }
 
       .errors {
-        margin: 0.6rem 0;
+        margin: 0.75rem 0;
         padding-left: 1.1rem;
         color: #991b1b;
+        display: grid;
+        gap: 0.35rem;
       }
 
       .success {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.85rem 1rem;
+        border-radius: 0.75rem;
+        background: rgba(22, 163, 74, 0.1);
+        border: 1px solid rgba(22, 163, 74, 0.28);
         color: #166534;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      .success::before {
+        content: '\2713';
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        background: #22c55e;
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        flex-shrink: 0;
       }
 
       @media (max-width: 1100px) {
