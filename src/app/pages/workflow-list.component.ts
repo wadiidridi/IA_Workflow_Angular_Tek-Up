@@ -18,7 +18,7 @@ type TemplateKey = 'summarize' | 'sentiment' | 'translate-summary' | 'weather' |
     <app-page-heading
       eyebrow="Workflow Studio"
       title="Orchestration visuelle type n8n"
-      description="Composez des agents connectes, visualisez le pipeline et lancez l'execution avec un historique charge automatiquement."
+      description=""
     ></app-page-heading>
 
     <section class="studio-hero">

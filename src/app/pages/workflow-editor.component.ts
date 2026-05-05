@@ -80,12 +80,8 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
         </div>
 
         <div class="canvas" (click)="cancelConnection()">
+          <div class="canvas-inner">
           <svg class="edge-layer">
-            <defs>
-              <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-                <polygon points="0,0 8,4 0,8" fill="#4f46e5" />
-              </marker>
-            </defs>
             <ng-container *ngFor="let edge of edgePaths(); trackBy: trackEdge">
               <path
                 [attr.d]="edge.path"
@@ -97,7 +93,6 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
                 [attr.d]="edge.path"
                 class="edge-path"
                 [class.selected]="selectedEdgeId() === edge.id"
-                marker-end="url(#arrow)"
               ></path>
             </ng-container>
           </svg>
@@ -124,6 +119,7 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
             <button type="button" class="handle output" (click)="startConnection(node.id, $event)" (mousedown)="startConnectionDrag(node.id, $event)" title="Glisser pour connecter"></button>
             <button type="button" class="remove-node" (click)="removeNode(node.id); $event.stopPropagation()">×</button>
           </div>
+          </div><!-- /canvas-inner -->
         </div>
       </main>
 
@@ -289,6 +285,8 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
         border: 1px solid #e2e8f0;
         border-radius: 0.8rem;
         background: #ffffff;
+        display: flex;
+        flex-direction: column;
         overflow: hidden;
       }
 
@@ -305,19 +303,60 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
 
       .canvas {
         position: relative;
+        flex: 1;
         height: calc(100vh - 280px);
         min-height: 480px;
+        overflow: scroll;
+        overflow-x: scroll;
+        overflow-y: scroll;
         background-image: radial-gradient(#cbd5e1 0.8px, transparent 0.8px);
         background-size: 26px 26px;
         background-color: #f8fafc;
+        cursor: default;
+        /* Scrollbar styling */
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+      }
+
+      .canvas::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      .canvas::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+      }
+
+      .canvas::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 4px;
+      }
+
+      .canvas::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+      }
+
+      .canvas::-webkit-scrollbar-corner {
+        background: #f1f5f9;
+      }
+
+      .canvas-inner {
+        position: relative;
+        min-width: 2400px;
+        min-height: 1600px;
+        width: 2400px;
+        height: 1600px;
       }
 
       .edge-layer {
         position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
+        top: 0;
+        left: 0;
+        width: 2400px;
+        height: 1600px;
         pointer-events: auto;
+        overflow: visible;
       }
 
       .edge-hit-path {
@@ -331,21 +370,23 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
       .edge-path {
         fill: none;
         stroke: #4f46e5;
-        stroke-width: 2;
-        stroke-dasharray: 5 7;
+        stroke-width: 2.5;
         pointer-events: none;
+        transition: stroke 0.15s ease, stroke-width 0.15s ease;
       }
 
       .edge-path.selected {
-        stroke: #1d4ed8;
-        stroke-width: 3;
+        stroke: #0ea5e9;
+        stroke-width: 3.5;
+        filter: drop-shadow(0 0 4px rgba(14, 165, 233, 0.6));
       }
 
       .temp-edge-layer {
         position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
+        top: 0;
+        left: 0;
+        width: 2400px;
+        height: 1600px;
         pointer-events: none;
       }
 
@@ -430,15 +471,29 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
 
       .remove-node {
         position: absolute;
-        top: 5px;
-        right: 6px;
+        top: -9px;
+        right: -9px;
         width: 22px;
         height: 22px;
-        border-radius: 999px;
-        border: none;
-        background: #fee2e2;
-        color: #991b1b;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        background: #ef4444;
+        color: #fff;
         cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 900;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        z-index: 10;
+        transition: background 0.15s ease, transform 0.15s ease;
+      }
+
+      .remove-node:hover {
+        background: #dc2626;
+        transform: scale(1.15);
       }
 
       .right-panel {

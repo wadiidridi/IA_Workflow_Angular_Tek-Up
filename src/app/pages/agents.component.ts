@@ -13,13 +13,13 @@ import { Agent, PaginatedResponse } from '../models';
   template: `
     <app-page-heading
       eyebrow="Agents"
-      title="Bibliothèque des agents IA"
-      description="Gérez les agents disponibles pour vos workflows"
+      title=""
+      description=""
     ></app-page-heading>
 
     <section class="card-panel">
       <div class="panel-header">
-        <h2>Agents disponibles</h2>
+        <h2>Agents </h2>
         <button class="btn-primary" (click)="showCreateForm = true">+ Nouvel agent</button>
       </div>
 

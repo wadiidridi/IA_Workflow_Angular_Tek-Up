@@ -52,18 +52,10 @@ interface NodeStatusMap {
               [attr.d]="generateEdgePath(edge)"
               class="edge-line"
               stroke="#0b82f7"
-              stroke-width="3"
+              stroke-width="2.5"
               fill="none"
-              stroke-dasharray="6 10"
-              marker-end="url(#arrowhead)"
             />
           </g>
-          <!-- Arrow marker -->
-          <defs>
-            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-              <polygon points="0 0, 10 3, 0 6" fill="#0b82f7" />
-            </marker>
-          </defs>
         </svg>
 
         <!-- Nodes with status -->
@@ -122,9 +114,10 @@ interface NodeStatusMap {
           <button 
             (click)="executeWorkflow()"
             [disabled]="running() || !prompt().trim() || !workflow()"
-            class="btn-primary full-width"
+            class="btn-run full-width"
           >
-            {{ running() ? 'Exécution...' : '▶ Lancer l\'exécution' }}
+            <span *ngIf="running()" class="spin-icon">&#9696;</span>
+            {{ runButtonLabel() }}
           </button>
         </div>
 
@@ -204,9 +197,38 @@ interface NodeStatusMap {
       font-weight: 700;
     }
 
-    .btn-primary {
+    .btn-run {
       background: linear-gradient(135deg, #2dd4bf, #facc15);
       color: #07111f;
+      font-size: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .btn-run:not(:disabled):hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-run:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    @keyframes spin-anim {
+      to { transform: rotate(360deg); }
+    }
+
+    .spin-icon {
+      display: inline-block;
+      animation: spin-anim 0.8s linear infinite;
     }
 
     .btn-secondary {
@@ -581,6 +603,12 @@ export class WorkflowPlaygroundComponent implements OnInit, OnDestroy {
     this.prompt.set(target?.value ?? '');
   }
 
+  runButtonLabel(): string {
+    if (this.running()) return 'Exécution en cours...';
+    if (this.currentRun()) return '↺ Relancer';
+    return '▶ Lancer l\'exécution';
+  }
+
   ngOnDestroy() {
     this.eventSource?.close();
   }
@@ -588,9 +616,13 @@ export class WorkflowPlaygroundComponent implements OnInit, OnDestroy {
   executeWorkflow() {
     if (!this.workflow() || !this.prompt().trim()) return;
 
+    // Reset all state for re-run
     this.running.set(true);
     this.logs.set([]);
     this.steps.set([]);
+    this.currentRun.set(null);
+    this.nodeStatusMap.set({});
+    this.eventSource?.close();
 
     const workflowId = this.workflowId;
     const promptText = this.prompt();

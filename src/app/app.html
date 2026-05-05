@@ -41,7 +41,12 @@
           <small>{{ auth.currentUser?.role || 'USER' }}</small>
         </div>
       </div>
-      <button type="button" class="logout-button" (click)="logout()">Deconnexion</button>
+      <div class="sidebar-actions">
+        <button type="button" class="collapse-button" (click)="toggleCollapse()" title="{{ sidebarCollapsed() ? 'Etendre' : 'Reduire' }}">
+          {{ sidebarCollapsed() ? '⇥' : '⇤' }}
+        </button>
+        <button type="button" class="logout-button" (click)="logout()">Deconnexion</button>
+      </div>
     </div>
   </aside>
 
@@ -60,14 +65,7 @@
         <h1>Orchestration intelligente</h1>
       </div>
 
-      <button
-        *ngIf="auth.isAuthenticated"
-        type="button"
-        class="collapse-button"
-        (click)="toggleCollapse()"
-      >
-        {{ sidebarCollapsed() ? 'Etendre' : 'Reduire' }}
-      </button>
+      <div class="topbar-spacer"></div>
     </header>
 
     <main class="main-content">

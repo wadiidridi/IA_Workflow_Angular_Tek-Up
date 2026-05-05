@@ -94,6 +94,11 @@ import { PageHeadingComponent } from '../components/page-heading.component';
         box-shadow: 0 30px 80px rgba(15, 23, 42, 0.32);
       }
 
+      form {
+        display: grid;
+        gap: 1.25rem;
+      }
+
       label {
         display: grid;
         gap: 0.55rem;

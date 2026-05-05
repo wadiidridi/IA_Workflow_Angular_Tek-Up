@@ -201,6 +201,15 @@
   gap: 0.75rem;
 }
 
+.sidebar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sidebar-actions .logout-button {
+  flex: 1;
+}
+
 .user-chip {
   display: flex;
   gap: 0.75rem;
@@ -218,12 +227,25 @@
   font-weight: 800;
 }
 
-.logout-button,
-.collapse-button {
+.logout-button {
   border-radius: 0.9rem;
   padding: 0.75rem 1rem;
   background: rgba(248, 113, 113, 0.13);
   color: #fecaca;
+}
+
+.collapse-button {
+  border-radius: 0.9rem;
+  padding: 0.75rem;
+  background: rgba(45, 212, 191, 0.12);
+  color: #99f6e4;
+  min-width: 2.8rem;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.topbar-spacer {
+  flex: 1;
 }
 
 .workspace {
