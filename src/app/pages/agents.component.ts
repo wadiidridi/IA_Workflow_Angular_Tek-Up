@@ -13,8 +13,8 @@ import { Agent, PaginatedResponse } from '../models';
   template: `
     <app-page-heading
       eyebrow="Agents"
-      title="BibliothÃ¨que des agents IA"
-      description="GÃ©rez les agents disponibles pour vos workflows"
+      title="Bibliothèque des agents IA"
+      description="Gérez les agents disponibles pour vos workflows"
     ></app-page-heading>
 
     <section class="card-panel">
@@ -44,49 +44,51 @@ import { Agent, PaginatedResponse } from '../models';
       <div *ngIf="loading" class="status-message">Chargement des agents...</div>
       <div *ngIf="error" class="status-message error">{{ error }}</div>
 
-      <table *ngIf="!loading && agents.length > 0" class="agents-table">
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Famille</th>
-            <th>Version</th>
-            <th>Endpoint</th>
-            <th>Tags</th>
-            <th>Statut</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let agent of agents">
-            <td>{{ agent.name }}</td>
-            <td>{{ agent.family }}</td>
-            <td>{{ agent.version }}</td>
-            <td><code>{{ agent.endpointUrl }}</code></td>
-            <td>
-              <span *ngFor="let tag of agent.tags" class="tag">{{ tag }}</span>
-            </td>
-            <td>
-              <span class="status" [class.active]="agent.active">
-                {{ agent.active ? 'Actif' : 'Inactif' }}
-              </span>
-            </td>
-            <td class="actions">
-              <button (click)="editAgent(agent)" class="btn-small">Ã‰diter</button>
-              <button (click)="deleteAgent(agent.id)" class="btn-small danger">Supprimer</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-wrapper">
+        <table *ngIf="!loading && agents.length > 0" class="agents-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Famille</th>
+              <th>Version</th>
+              <th>Endpoint</th>
+              <th>Tags</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let agent of agents">
+              <td>{{ agent.name }}</td>
+              <td>{{ agent.family }}</td>
+              <td>{{ agent.version }}</td>
+              <td class="endpoint-cell" [title]="agent.endpointUrl"><code>{{ agent.endpointUrl }}</code></td>
+              <td>
+                <span *ngFor="let tag of agent.tags" class="tag">{{ tag }}</span>
+              </td>
+              <td>
+                <span class="status" [class.active]="agent.active">
+                  {{ agent.active ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td class="actions">
+                <button (click)="editAgent(agent)" class="btn-small">Éditer</button>
+                <button (click)="deleteAgent(agent.id)" class="btn-small danger">Supprimer</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <div *ngIf="!loading && agents.length === 0" class="status-message">
-        Aucun agent trouvÃ©
+        Aucun agent trouvé
       </div>
     </section>
 
-    <!-- Modal de crÃ©ation/Ã©dition -->
+    <!-- Modal de création/édition -->
     <div *ngIf="showCreateForm" class="modal-overlay" (click)="closeForm()">
       <div class="modal-content" (click)="$event.stopPropagation()">
-        <h3>{{ editingAgent ? 'Ã‰diter l\'agent' : 'CrÃ©er un nouvel agent' }}</h3>
+        <h3>{{ editingAgent ? 'Éditer l\'agent' : 'Créer un nouvel agent' }}</h3>
         <form (ngSubmit)="saveAgent()">
           <div class="form-group">
             <label>Nom</label>
@@ -109,7 +111,7 @@ import { Agent, PaginatedResponse } from '../models';
               Annuler
             </button>
             <button type="submit" class="btn-primary">
-              {{ editingAgent ? 'Mettre Ã  jour' : 'CrÃ©er' }}
+              {{ editingAgent ? 'Mettre à jour' : 'Créer' }}
             </button>
           </div>
         </form>
@@ -145,8 +147,16 @@ import { Agent, PaginatedResponse } from '../models';
       color: #e2e8f0;
     }
 
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 0.75rem;
+    }
+
     .agents-table {
       width: 100%;
+      min-width: 700px;
       border-collapse: collapse;
     }
 
@@ -154,12 +164,23 @@ import { Agent, PaginatedResponse } from '../models';
       padding: 0.75rem;
       text-align: left;
       border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      white-space: nowrap;
+    }
+
+    td.endpoint-cell {
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     th {
       font-weight: 600;
       color: #94a3b8;
       font-size: 0.9rem;
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.98);
     }
 
     td {
@@ -170,7 +191,12 @@ import { Agent, PaginatedResponse } from '../models';
       background: rgba(148, 163, 184, 0.1);
       padding: 0.25rem 0.5rem;
       border-radius: 0.25rem;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
+      display: inline-block;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: middle;
     }
 
     .tag {
@@ -307,13 +333,6 @@ import { Agent, PaginatedResponse } from '../models';
       .search-input, .filter-select {
         width: 100%;
       }
-
-      .agents-table {
-        display: block;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        white-space: nowrap;
-      }
     }
 
     @media (max-width: 540px) {
@@ -411,7 +430,7 @@ export class AgentsComponent implements OnInit {
           this.agents = this.agents.map((agent) => agent.id === updatedAgent.id ? updatedAgent : agent);
           this.data.agents.set(this.agents);
         },
-        error: () => this.error = 'Erreur lors de la mise Ã  jour'
+        error: () => this.error = 'Erreur lors de la mise à jour'
       });
     } else {
       this.agentService.createAgent(payload).subscribe({
@@ -422,13 +441,13 @@ export class AgentsComponent implements OnInit {
           this.agents = [createdAgent, ...this.agents.filter((agent) => agent.id !== createdAgent.id)];
           this.data.agents.set(this.agents);
         },
-        error: () => this.error = 'Erreur lors de la crÃ©ation'
+        error: () => this.error = 'Erreur lors de la création'
       });
     }
   }
 
   deleteAgent(id: string): void {
-    if (confirm('ÃŠtes-vous sÃ»r de vouloir supprimer cet agent ?')) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')) {
       this.agentService.deleteAgent(id).subscribe({
         next: () => this.loadAgents(),
         error: () => this.error = 'Erreur lors de la suppression'
