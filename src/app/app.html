@@ -1,0 +1,83 @@
+﻿<div class="app-shell" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <aside class="sidebar" [class.open]="sidebarOpen()" aria-label="Navigation principale">
+    <button type="button" class="sidebar-close" (click)="closeMobileSidebar()" aria-label="Fermer le menu">✕</button>
+    <div class="brand">
+      <div class="brand-mark">T</div>
+      <div class="brand-copy">
+        <span class="brand-label">{{ title() }}</span>
+        <small>AI Workflow Control</small>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a
+        *ngFor="let item of navItems()"
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.path === '' }"
+        (click)="closeMobileSidebar()"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-copy">
+          <strong>{{ item.label }}</strong>
+          <small>{{ item.hint }}</small>
+        </span>
+      </a>
+    </nav>
+
+    <div class="sidebar-card" *ngIf="auth.isAuthenticated">
+      <span class="pulse"></span>
+      <div>
+        <strong>Orchestrateur actif</strong>
+        <small>Suivi temps reel des workflows</small>
+      </div>
+    </div>
+
+    <div class="sidebar-footer" *ngIf="auth.isAuthenticated">
+      <div class="user-chip">
+        <span>{{ userInitial() }}</span>
+        <div>
+          <strong>{{ auth.currentUser?.email || 'Utilisateur TekUp' }}</strong>
+          <small>{{ auth.currentUser?.role || 'USER' }}</small>
+        </div>
+      </div>
+      <button type="button" class="logout-button" (click)="logout()">Deconnexion</button>
+    </div>
+  </aside>
+
+  <div class="mobile-overlay" *ngIf="sidebarOpen()" (click)="closeMobileSidebar()"></div>
+
+  <section class="workspace">
+    <header class="topbar">
+      <button type="button" class="menu-button" (click)="toggleSidebar()" aria-label="Ouvrir la navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div>
+        <span class="topbar-kicker">TekUp Studio</span>
+        <h1>Orchestration intelligente</h1>
+      </div>
+
+      <button
+        *ngIf="auth.isAuthenticated"
+        type="button"
+        class="collapse-button"
+        (click)="toggleCollapse()"
+      >
+        {{ sidebarCollapsed() ? 'Etendre' : 'Reduire' }}
+      </button>
+    </header>
+
+    <main class="main-content">
+      <section class="page-content">
+        <router-outlet></router-outlet>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 TekUp. Application de pilotage des workflows IA.</span>
+    </footer>
+  </section>
+</div>
