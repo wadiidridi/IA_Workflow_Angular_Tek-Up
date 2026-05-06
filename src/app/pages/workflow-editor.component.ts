@@ -643,7 +643,7 @@ import { Agent, Workflow, WorkflowEdge, WorkflowNode } from '../models';
       }
 
       .success::before {
-        content: '\2713';
+        content: '\\2713';
         width: 1.5rem;
         height: 1.5rem;
         border-radius: 50%;
