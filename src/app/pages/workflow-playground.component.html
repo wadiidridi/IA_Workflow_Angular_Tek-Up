@@ -1,0 +1,171 @@
+<app-page-heading
+  eyebrow="Playground"
+  title="{{ workflow()?.name || 'Exécution du workflow' }}"
+  description="Lancez votre workflow et visualisez l'exécution en temps réel avec les statuts de chaque agent."
+></app-page-heading>
+
+<section class="playground-toolbar">
+  <button (click)="goBack()" class="btn-secondary">← Retour</button>
+  <div class="run-status">
+    <span *ngIf="currentRun() as run" [ngClass]="'status status-' + run.status.toLowerCase()">
+      {{ run.status }}
+    </span>
+    <span *ngIf="currentRun()?.durationMs as duration" class="duration">{{ duration }}ms</span>
+  </div>
+</section>
+
+<section class="playground-container">
+  <!-- Left: Graph -->
+  <main class="graph-area">
+    <div class="graph-toolbar">
+      <div class="graph-info">
+        <span>{{ workflow()?.nodes?.length || 0 }} agents</span>
+        <span>{{ workflow()?.edges?.length || 0 }} liaisons</span>
+      </div>
+    </div>
+
+    <svg class="execution-graph" #executionGraph>
+      <!-- Edges -->
+      <g class="edges">
+        <path 
+          *ngFor="let edge of workflow()?.edges || []"
+          [attr.d]="generateEdgePath(edge)"
+          class="edge-line"
+          stroke="#0b82f7"
+          stroke-width="2.5"
+          fill="none"
+        />
+      </g>
+    </svg>
+
+    <!-- Nodes with status -->
+    <div class="nodes-execution">
+      <div 
+        *ngFor="let node of workflow()?.nodes || []"
+        class="exec-node"
+        [class.status-pending]="nodeStatus()[node.id] === 'PENDING'"
+        [class.status-running]="nodeStatus()[node.id] === 'RUNNING'"
+        [class.status-success]="nodeStatus()[node.id] === 'SUCCESS'"
+        [class.status-failed]="nodeStatus()[node.id] === 'FAILED'"
+        [class.status-skipped]="nodeStatus()[node.id] === 'SKIPPED'"
+        [style.left.px]="node.position.x"
+        [style.top.px]="node.position.y"
+      >
+        <div class="node-body">
+          <div class="node-status-icon">
+            <span *ngIf="nodeStatus()[node.id] === 'PENDING'">⏳</span>
+            <span *ngIf="nodeStatus()[node.id] === 'RUNNING'">⚙️</span>
+            <span *ngIf="nodeStatus()[node.id] === 'SUCCESS'">✓</span>
+            <span *ngIf="nodeStatus()[node.id] === 'FAILED'">✕</span>
+            <span *ngIf="nodeStatus()[node.id] === 'SKIPPED'">⊘</span>
+          </div>
+          <div class="node-content">
+            <strong>{{ node.label }}</strong>
+            <small>{{ nodeStatus()[node.id] || 'PENDING' }}</small>
+          </div>
+        </div>
+        
+        <!-- Handles -->
+        <div class="handle handle-left"></div>
+        <div class="handle handle-right"></div>
+      </div>
+    </div>
+
+    <div class="canvas-grid"></div>
+  </main>
+
+  <!-- Right: Control & Logs -->
+  <aside class="control-panel">
+    <!-- Execution Controls -->
+    <div class="panel-section control-section">
+      <h3>Lancer l'exécution</h3>
+      
+      <textarea
+        placeholder="Entrez votre prompt ou contenu à traiter..."
+        [value]="prompt()"
+        (input)="onPromptInput($event)"
+        [disabled]="running()"
+        rows="6"
+        class="prompt-input"
+      ></textarea>
+
+      <div class="char-count">{{ prompt().length }} / 50,000</div>
+
+      <button 
+        (click)="executeWorkflow()"
+        [disabled]="running() || !prompt().trim() || !workflow()"
+        class="btn-run full-width"
+      >
+        <span *ngIf="running()" class="spin-icon">&#9696;</span>
+        {{ runButtonLabel() }}
+      </button>
+    </div>
+
+    <!-- Steps -->
+    <div class="panel-section steps-section">
+      <h4>Étapes ({{ steps().length }})</h4>
+      <div class="steps-list">
+        <div *ngFor="let step of steps()" [ngClass]="'step step-' + step.status.toLowerCase()">
+          <span class="step-label">{{ step.label || step.nodeId }}</span>
+          <span class="step-status">{{ step.status }}</span>
+          <span class="step-duration" *ngIf="step.durationMs">{{ step.durationMs }}ms</span>
+        </div>
+        <div *ngIf="steps().length === 0" class="empty-list">Aucune étape exécutée</div>
+      </div>
+    </div>
+
+    <div class="panel-section response-section" *ngIf="steps().length > 0">
+      <h4>Réponses complètes</h4>
+      <div class="responses-list">
+        <article *ngFor="let step of steps()" class="response-item">
+          <div class="response-head">
+            <span>{{ step.label || step.nodeId }}</span>
+            <span class="response-status" [ngClass]="'step-' + step.status.toLowerCase()">{{ statusLabel(step.status) }}</span>
+          </div>
+
+          <div class="response-body">
+            <div class="response-meta">
+              <div>
+                <span class="meta-label">Node ID</span>
+                <p>{{ step.nodeId }}</p>
+              </div>
+              <div>
+                <span class="meta-label">Step ID</span>
+                <p>{{ step.id }}</p>
+              </div>
+            </div>
+            <div class="response-box" *ngIf="step.inputPreview !== undefined">
+              <span>Input</span>
+              <pre>{{ prettyJson(step.inputPreview) }}</pre>
+            </div>
+            <div class="response-box" *ngIf="step.outputPreview !== undefined">
+              <span>Output</span>
+              <pre>{{ prettyJson(step.outputPreview) }}</pre>
+            </div>
+            <div class="response-box" *ngIf="(step.logs?.length || 0) > 0">
+              <span>Logs</span>
+              <pre>{{ formatStepLogs(step.logs) }}</pre>
+            </div>
+            <div class="response-box error" *ngIf="step.errorMessage">
+              <span>Erreur</span>
+              <pre>{{ step.errorMessage }}</pre>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- Logs -->
+    <div class="panel-section logs-section flex-1">
+      <h4>Logs</h4>
+      <div class="logs-output">
+        <div *ngFor="let log of logs()" class="log-line" [ngClass]="'log-' + log.level">
+          <span class="log-time">{{ log.time }}</span>
+          <span class="log-text">{{ log.message }}</span>
+        </div>
+        <div *ngIf="logs().length === 0" class="empty-logs">En attente d'exécution...</div>
+        <div #logsEnd></div>
+      </div>
+    </div>
+  </aside>
+</section>
